@@ -21,9 +21,9 @@ class Post extends Db {
         return $result;
     }
 
-    /** 
+    /**
      * 全投稿のデータ数を取得
-     * 
+     *
      * @return Int $count 全投稿の件数
     */
     public function countAll() {
@@ -33,8 +33,6 @@ class Post extends Db {
         $count = $sth->fetchColumn();
         return $count;
     }
-
-
 
     /**
      * postテーブルから指定IDの全データ数を取得
@@ -127,7 +125,6 @@ class Post extends Db {
 
         $save_path = $upload_dir . $save_filename;
 
-       
         $postData = $_SESSION['postData'];
         
         $title  = $postData['title'];
@@ -139,7 +136,8 @@ class Post extends Db {
 
         try{
             $sth = $this->dbh->prepare($sql);
-            
+            $this->dbh->beginTransaction();
+
             $sth->bindValue(':title',$title,PDO::PARAM_STR);
             $sth->bindValue(':style_id',$style_id,PDO::PARAM_STR);
             $sth->bindValue(':contents',$contents,PDO::PARAM_STR);
@@ -148,10 +146,10 @@ class Post extends Db {
             $sth->bindValue(':user_id',$user_id,PDO::PARAM_INT);
             // // executeで実行
             $result = $sth->execute();
-
-
+            $this->dbh->commit();
             return $result;
         } catch(\Exception $e) {
+            $this->dbh->rollback();
             echo $e->getMessage();
             return $result;
         }
@@ -223,6 +221,7 @@ class Post extends Db {
 
                 $sql = " INSERT INTO items(`user_id`,`post_id`,`category_id`,`brand`,`item_name`,`price`,`size`)VALUES(:user_id, (SELECT post_id FROM post ORDER BY post_id DESC LIMIT 1), :category_id, :brand, :item_name, :price, :size) ";
                 $sth = $this->dbh->prepare($sql);
+                $this->dbh->beginTransaction();
                 $sth->bindValue(':user_id',$user_id,PDO::PARAM_INT);
                 $sth->bindValue(':category_id',$category_id,PDO::PARAM_INT);
                 $sth->bindValue(':brand',$brand,PDO::PARAM_STR);
@@ -230,9 +229,11 @@ class Post extends Db {
                 $sth->bindValue(':price',$price,PDO::PARAM_STR);
                 $sth->bindValue(':size',$size,PDO::PARAM_STR);
                 $result = $sth->execute();
+                $this->dbh->commit();
             }
             return $result;
         } catch (\Exception $e) {
+            $this->dbh->rollback();
             error_log('エラー'.$e->getMessage());
             echo $e->getMessage();
             echo '保存できていません。';
@@ -269,6 +270,7 @@ class Post extends Db {
 
                     $sql = " INSERT INTO items(`user_id`,`post_id`,`category_id`,`brand`,`item_name`,`price`,`size`)VALUES(:user_id, :post_id, :category_id, :brand, :item_name, :price, :size) ";
                     $sth = $this->dbh->prepare($sql);
+                    $this->dbh->beginTransaction();
                     $sth->bindValue(':user_id',$user_id,PDO::PARAM_INT);
                     $sth->bindValue(':post_id',$post_id,PDO::PARAM_INT);
                     $sth->bindValue(':category_id',$category_id,PDO::PARAM_INT);
@@ -277,10 +279,12 @@ class Post extends Db {
                     $sth->bindValue(':price',$price,PDO::PARAM_STR);
                     $sth->bindValue(':size',$size,PDO::PARAM_STR);
                     $result = $sth->execute();
+                    $this->dbh->commit();
                 }
             }
             return $result;
         } catch (\Exception $e) {
+            $this->dbh->rollback();
             error_log('エラー'.$e->getMessage());
             echo $e->getMessage();
             echo '保存できていません。';
@@ -327,6 +331,7 @@ class Post extends Db {
         $sql .= ' WHERE post_id = :id ';
         try{
             $sth = $this->dbh->prepare($sql);
+            $this->dbh->beginTransaction();
             $sth->bindValue(':id', $post_id, PDO::PARAM_INT);
             $sth->bindValue(':title',$title,PDO::PARAM_STR);
             $sth->bindValue(':style_id',$style_id,PDO::PARAM_STR);
@@ -336,9 +341,10 @@ class Post extends Db {
             $sth->bindValue(':user_id',$user_id,PDO::PARAM_INT);
             // // executeで実行
             $result = $sth->execute();
-
+            $this->dbh->commit();
             return $result;
         } catch(\Exception $e) {
+            $this->dbh->rollback();
             echo $e->getMessage();
             return $result;
         }
@@ -373,6 +379,7 @@ class Post extends Db {
 
                 $sql = " UPDATE items SET user_id = :user_id, post_id = :post_id, items_id = :items_id, category_id = :category_id, brand = :brand, item_name = :item_name, price = :price, size = :size WHERE post_id = :post_id AND items_id = :items_id ";
                 $sth = $this->dbh->prepare($sql);
+                $this->dbh->beginTransaction();
                 $sth->bindValue(':user_id',$user_id,PDO::PARAM_INT);
                 $sth->bindValue(':post_id',$post_id,PDO::PARAM_INT);
                 $sth->bindValue(':items_id',$items_id,PDO::PARAM_INT);
@@ -382,9 +389,11 @@ class Post extends Db {
                 $sth->bindValue(':price',$price,PDO::PARAM_STR);
                 $sth->bindValue(':size',$size,PDO::PARAM_STR);
                 $result = $sth->execute();
+                $this->dbh->commit();
             }
             return $result;
         } catch (\Exception $e) {
+            $this->dbh->rollback();
             error_log('エラー'.$e->getMessage());
             echo $e->getMessage();
             echo '保存できていません。';
@@ -397,12 +406,24 @@ class Post extends Db {
      * del_flgカラムが０で表示、１で非表示にするためにUPDATEで更新する。
      */
     public function deletePostData($id = 0) {
+        $result = false;
+
+        try{
         $sql = ' UPDATE post SET del_flg = 1 ';
         $sql .= ' WHERE post_id = :post_id ';
         $sth = $this->dbh->prepare($sql);
+        $this->dbh->beginTransaction();
         $sth->bindValue(':post_id', $id, PDO::PARAM_INT);
-        $sth->execute();
-
+        $result = $sth->execute();
+        $this->dbh->commit();
+        return $result;
+        }catch(\Exception $e) {
+            $this->dbh->rollback();
+                error_log('エラー'.$e->getMessage());
+                echo $e->getMessage();
+                echo '保存できていません。';
+                return $result;
+        }
     }
 
 }
