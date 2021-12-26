@@ -3,8 +3,6 @@ session_start();
 require_once(ROOT_PATH .'Controller/CoordinateController.php');
 $edit = new CoordinateController();
 $params = $edit->edit();
-// var_dump($params);
-
 
 if(isset($_SESSION['errors'])){
     $errors = $_SESSION['errors'];
@@ -317,9 +315,6 @@ $_SESSION['errors'] = '';
 $_SESSION['postData'] = '';
 $_SESSION['itemData'] = '';
 $_SESSION['postImage'] = '';
-
-
-// var_dump($_POST);
 
 ?>
 <!DOCTYPE html>

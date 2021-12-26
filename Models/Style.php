@@ -6,6 +6,11 @@ class Style extends Db {
         parent::__construct($dbh);
     }
 
+    /**
+     * スタイル別投稿データを参照する
+     * @param void
+     * @return Array $result 全参照データ
+     */
     public function styleAll($page,$style_id) {
         $sql = " SELECT p.post_id, p.title, p.style_id, p.file_path, u.name, p.created_id, p.updated_id FROM post p INNER JOIN users u ON p.user_id = u.id WHERE p.style_id = :style_id AND del_flg = 0 ";
         $sql .= ' LIMIT 9 OFFSET '.(9 * $page);
@@ -17,22 +22,5 @@ class Style extends Db {
         return $result;
     }
 
-
-    /**
-     * 指定IDのエリア名を取得する
-     * @param void
-     * @return Array $result 全参照データ
-     */
-    
-    public function styleById($style_id = 0) {
-
-        $sql = ' SELECT * FROM style WHERE id = :style_id';
-        $stmt = $this->dbh->prepare($sql);
-        $stmt->bindParam(':style_id', $style_id, PDO::PARAM_STR);
-        $stmt->execute();
-        // 結果の取得
-        $result = $stmt->fetch(PDO::FETCH_ASSOC);
-        return $result;
-    }
 }
 ?>

@@ -3,7 +3,7 @@ session_start();
 require_once(ROOT_PATH .'Models/Users.php');
 
 $result = Users::checkLogin();
-var_dump($_POST);
+
 if($result) {
     header('Location: main.php?id='.$_SESSION['login_user']['id']);
     return;

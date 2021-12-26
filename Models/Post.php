@@ -54,21 +54,6 @@ class Post extends Db {
     }
 
     /**
-     * エリア別投稿データを参照する
-     * @param void
-     * @return Array $result 全参照データ
-     */
-    public function findByStyle($style_id = 0) {
-        $sql = " SELECT p.post_id, p.title, p.style_id, p.file_path, u.name, p.created_id, p.updated_id FROM post p INNER JOIN users u ON p.user_id = u.id WHERE p.style_id = style_id AND del_flg = 0 ";
-        $stmt = $this->dbh->prepare($sql);
-        $stmt->bindParam(':style_id', $style_id, PDO::PARAM_STR);
-        $stmt->execute();
-        // 結果の取得
-        $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        return $result;
-    }
-
-    /**
      * ユーザ別投稿データを参照する
      * @param void
      * @return Array $result 全参照データ
@@ -89,7 +74,7 @@ class Post extends Db {
 
     /**
      * 投稿詳細を取得する（指定IDのデータ）
-     * @param int $id 投稿のID
+     * @param int $post_id 投稿のID
      * @return Array $result 指定IDの投稿データ
      */
     public function findById($id) {
@@ -102,6 +87,11 @@ class Post extends Db {
         return $result;
     }
 
+    /**
+     * アイテムの投稿詳細を取得する（指定IDのデータ）
+     * @param int $post_id 投稿のID
+     * @return Array $result 指定IDの投稿データ
+     */
     public function findItems($id) {
         $sql = " SELECT i.items_id, i.user_id, i.post_id, i.brand, i.item_name, i.price, i.size, c.category_id, c.category_name FROM items i INNER JOIN categories c ON c.category_id = i.category_id WHERE post_id = :post_id ";
         $sth = $this->dbh->prepare($sql);
@@ -112,19 +102,7 @@ class Post extends Db {
         return $result;
     }
 
-    public function editItems($id)
-    {
-        $sql = " SELECT i.items_id, i.user_id, i.post_id, i.brand, i.item_name, i.price, i.size, c.category_id, c.category_name FROM items i INNER JOIN categories c ON c.category_id = i.category_id WHERE post_id = :post_id ";
-        $sth = $this->dbh->prepare($sql);
-        $sth->bindParam(':post_id', $id, PDO::PARAM_INT);
-        $sth->execute();
-        // 結果の取得
-        $result = $sth->fetchAll(PDO::FETCH_ASSOC);
-        return $result;
-    }
-
-
-/**
+    /**
      * 新規投稿の保存(タイトル、スタイルID、コーデ内容紹介、ファイル名、保存先のパス）
      * @param int $user_id ユーザID
      * @param string $title　タイトル
@@ -158,6 +136,7 @@ class Post extends Db {
         $user_id  = $postData['user_id'];
 
         $sql = " INSERT INTO post (`title`,`style_id`,`contents`,`file_name`,`file_path`,`user_id`,`created_id`, del_flg) VALUES (:title, :style_id, :contents, :file_name, :file_path, :user_id, NOW(), 0) ";
+
         try{
             $sth = $this->dbh->prepare($sql);
             
@@ -178,6 +157,46 @@ class Post extends Db {
         }
     }
 
+    public function createItemsArray($itemData) {
+        $items = [
+            '1' => ['category_id' => $itemData['category1'],
+                       'items_id' => $itemData['items_id1'],
+                       'brand' => $itemData['brand1'],
+                       'item_name' => $itemData['item_name1'],
+                       'price' => $itemData['price1'],
+                       'size' => $itemData['size1'],
+            ],
+            '2' => ['category_id' => $itemData['category2'],
+                        'items_id' => $itemData['items_id2'],
+                        'brand' => $itemData['brand2'],
+                        'item_name' => $itemData['item_name2'],
+                        'price' => $itemData['price2'],
+                        'size' => $itemData['size2'],
+            ],
+            '3' => ['category_id' => $itemData['category3'],
+                        'items_id' => $itemData['items_id3'],
+                        'brand' => $itemData['brand3'],
+                        'item_name' => $itemData['item_name3'],
+                        'price' => $itemData['price3'],
+                        'size' => $itemData['size3'],
+            ],
+            '4' => ['category_id' => $itemData['category4'],
+                        'items_id' => $itemData['items_id4'],
+                        'brand' => $itemData['brand4'],
+                        'item_name' => $itemData['item_name4'],
+                        'price' => $itemData['price4'],
+                        'size' => $itemData['size4'],
+            ],
+            '5' => ['category_id' => $itemData['category5'],
+                    'items_id' => $itemData['items_id5'],
+                    'brand' => $itemData['brand5'],
+                    'item_name' => $itemData['item_name5'],
+                    'price' => $itemData['price5'],
+                    'size' => $itemData['size5'],
+            ],
+        ];
+        return $items;
+    }
     /**
      * 新規投稿の保存(タイトル、スタイルID、コーデ内容紹介、ファイル名、保存先のパス）
      * @param int $user_id ユーザID
@@ -191,75 +210,27 @@ class Post extends Db {
     public function savePostItemData($itemData) {
         $result = false;
 
-
-
         $user_id  = $itemData['user_id'];
-        $post_id  = $itemData['post_id'];
-        $category_id1 = $itemData['category1'];
-        $brand1 = $itemData['brand1'];
-        $item_name1 = $itemData['item_name1'];
-        $price1 = $itemData['price1'];
-        $size1 = $itemData['size1'];
-        $category_id2 = $itemData['category2'];
-        $brand2 = $itemData['brand2'];
-        $item_name2 = $itemData['item_name2'];
-        $price2 = $itemData['price2'];
-        $size2 = $itemData['size2'];
-        $category_id3 = $itemData['category3'];
-        $brand3 = $itemData['brand3'];
-        $item_name3 = $itemData['item_name3'];
-        $price3 = $itemData['price3'];
-        $size3 = $itemData['size3'];
-        $category_id4 = $itemData['category4'];
-        $brand4 = $itemData['brand4'];
-        $item_name4 = $itemData['item_name4'];
-        $price4 = $itemData['price4'];
-        $size4 = $itemData['size4'];
-        $category_id5 = $itemData['category5'];
-        $brand5 = $itemData['brand5'];
-        $item_name5 = $itemData['item_name5'];
-        $price5 = $itemData['price5'];
-        $size5 = $itemData['size5'];
+        $items = $this->createItemsArray($itemData);
 
-
-
-        $sql = " INSERT INTO items(`user_id`,`post_id`,`category_id`,`brand`,`item_name`,`price`,`size`)VALUES(:user_id, (SELECT post_id FROM post ORDER BY post_id DESC LIMIT 1), :category_id1, :brand1, :item_name1, :price1, :size1);
-                 INSERT INTO items(`user_id`,`post_id`,`category_id`,`brand`,`item_name`,`price`,`size`)VALUES(:user_id, (SELECT post_id FROM post ORDER BY post_id DESC LIMIT 1), :category_id2, :brand2, :item_name2, :price2, :size2);
-                 INSERT INTO items(`user_id`,`post_id`,`category_id`,`brand`,`item_name`,`price`,`size`)VALUES(:user_id, (SELECT post_id FROM post ORDER BY post_id DESC LIMIT 1), :category_id3, :brand3, :item_name3, :price3, :size3);
-                 INSERT INTO items(`user_id`,`post_id`,`category_id`,`brand`,`item_name`,`price`,`size`)VALUES(:user_id, (SELECT post_id FROM post ORDER BY post_id DESC LIMIT 1), :category_id4, :brand4, :item_name4, :price4, :size4);
-                 INSERT INTO items(`user_id`,`post_id`,`category_id`,`brand`,`item_name`,`price`,`size`)VALUES(:user_id, (SELECT post_id FROM post ORDER BY post_id DESC LIMIT 1), :category_id5, :brand5, :item_name5, :price5, :size5); ";
         try{
-            $sth = $this->dbh->prepare($sql);
-            $sth->bindValue(':user_id',$user_id,PDO::PARAM_INT);
-            $sth->bindValue(':post_id',$post_id,PDO::PARAM_INT);
-            $sth->bindValue(':category_id1',$category_id1,PDO::PARAM_INT);
-            $sth->bindValue(':category_id2',$category_id2,PDO::PARAM_INT);
-            $sth->bindValue(':category_id3',$category_id3,PDO::PARAM_INT);
-            $sth->bindValue(':category_id4',$category_id4,PDO::PARAM_INT);
-            $sth->bindValue(':category_id5',$category_id5,PDO::PARAM_INT);
-            $sth->bindValue(':brand1',$brand1,PDO::PARAM_STR);
-            $sth->bindValue(':brand2',$brand2,PDO::PARAM_STR);
-            $sth->bindValue(':brand3',$brand3,PDO::PARAM_STR);
-            $sth->bindValue(':brand4',$brand4,PDO::PARAM_STR);
-            $sth->bindValue(':brand5',$brand5,PDO::PARAM_STR);
-            $sth->bindValue(':item_name1',$item_name1,PDO::PARAM_STR);
-            $sth->bindValue(':item_name2',$item_name2,PDO::PARAM_STR);
-            $sth->bindValue(':item_name3',$item_name3,PDO::PARAM_STR);
-            $sth->bindValue(':item_name4',$item_name4,PDO::PARAM_STR);
-            $sth->bindValue(':item_name5',$item_name5,PDO::PARAM_STR);
-            $sth->bindValue(':price1',$price1,PDO::PARAM_STR);
-            $sth->bindValue(':price2',$price2,PDO::PARAM_STR);
-            $sth->bindValue(':price3',$price3,PDO::PARAM_STR);
-            $sth->bindValue(':price4',$price4,PDO::PARAM_STR);
-            $sth->bindValue(':price5',$price5,PDO::PARAM_STR);
-            $sth->bindValue(':size1',$size1,PDO::PARAM_STR);
-            $sth->bindValue(':size2',$size2,PDO::PARAM_STR);
-            $sth->bindValue(':size3',$size3,PDO::PARAM_STR);
-            $sth->bindValue(':size4',$size4,PDO::PARAM_STR);
-            $sth->bindValue(':size5',$size5,PDO::PARAM_STR);
-            // executeで実行
-            $result = $sth->execute();
+            foreach($items as $item){
+                $category_id = $item['category_id'];
+                $brand = $item['brand'];
+                $item_name = $item['item_name'];
+                $price = $item['price'];
+                $size = $item['size'];
 
+                $sql = " INSERT INTO items(`user_id`,`post_id`,`category_id`,`brand`,`item_name`,`price`,`size`)VALUES(:user_id, (SELECT post_id FROM post ORDER BY post_id DESC LIMIT 1), :category_id, :brand, :item_name, :price, :size) ";
+                $sth = $this->dbh->prepare($sql);
+                $sth->bindValue(':user_id',$user_id,PDO::PARAM_INT);
+                $sth->bindValue(':category_id',$category_id,PDO::PARAM_INT);
+                $sth->bindValue(':brand',$brand,PDO::PARAM_STR);
+                $sth->bindValue(':item_name',$item_name,PDO::PARAM_STR);
+                $sth->bindValue(':price',$price,PDO::PARAM_STR);
+                $sth->bindValue(':size',$size,PDO::PARAM_STR);
+                $result = $sth->execute();
+            }
             return $result;
         } catch (\Exception $e) {
             error_log('エラー'.$e->getMessage());
@@ -267,103 +238,47 @@ class Post extends Db {
             echo '保存できていません。';
             return $result;
         }
+
     }
 
+    /**
+     * 投稿編集でアイテムを増やした場合に内容を保存(カテゴリー、ブランド、アイテム名、価格、サイズ）
+     * @param int $user_id ユーザID
+     * @param string $category_id　カテゴリー
+     * @param string $brand　ブランド
+     * @param string $item_name アイテムの名前
+     * @param string $price　価格
+     * @param string $size　サイズ
+     * @return bool $result
+     */
     public function editSaveItemData($itemData) {
         $result = false;
 
         $user_id  = $itemData['user_id'];
         $post_id  = $itemData['post_id'];
+        $items = $this->createItemsArray($itemData);
 
-        if(empty($itemData['items_id1'])){
-            $category_id1 = $itemData['category1'];
-            $brand1 = $itemData['brand1'];
-            $item_name1 = $itemData['item_name1'];
-            $price1 = $itemData['price1'];
-            $size1 = $itemData['size1'];
-        }else{
-            $category_id1 = 0;
-        }
-
-        if(empty($itemData['items_id2'])){
-            $category_id2 = $itemData['category2'];
-            $brand2 = $itemData['brand2'];
-            $item_name2 = $itemData['item_name2'];
-            $price2 = $itemData['price2'];
-            $size2 = $itemData['size2'];
-        }else{
-            $category_id2 = 0;
-        }
-        
-        if(empty($itemData['items_id3'])){
-            $category_id3 = $itemData['category3'];
-            $brand3 = $itemData['brand3'];
-            $item_name3 = $itemData['item_name3'];
-            $price3 = $itemData['price3'];
-            $size3 = $itemData['size3'];
-        }else{
-            $category_id3 = 0;
-        }
-
-        if(empty($itemData['items_id4'])){
-            $category_id4 = $itemData['category4'];
-            $brand4 = $itemData['brand4'];
-            $item_name4 = $itemData['item_name4'];
-            $price4 = $itemData['price4'];
-            $size4 = $itemData['size4'];
-        }else{
-            $category_id4 = 0;
-        }
-
-        if(empty($itemData['items_id5'])){
-            $category_id5 = $itemData['category5'];
-            $brand5 = $itemData['brand5'];
-            $item_name5 = $itemData['item_name5'];
-            $price5 = $itemData['price5'];
-            $size5 = $itemData['size5'];
-        }else{
-            $category_id5 = 0;
-        }
-
-
-
-        $sql = " INSERT INTO items(`user_id`,`post_id`,`category_id`,`brand`,`item_name`,`price`,`size`)VALUES(:user_id, :post_id, :category_id1, :brand1, :item_name1, :price1, :size1);
-                 INSERT INTO items(`user_id`,`post_id`,`category_id`,`brand`,`item_name`,`price`,`size`)VALUES(:user_id, :post_id, :category_id2, :brand2, :item_name2, :price2, :size2);
-                 INSERT INTO items(`user_id`,`post_id`,`category_id`,`brand`,`item_name`,`price`,`size`)VALUES(:user_id, :post_id, :category_id3, :brand3, :item_name3, :price3, :size3);
-                 INSERT INTO items(`user_id`,`post_id`,`category_id`,`brand`,`item_name`,`price`,`size`)VALUES(:user_id, :post_id, :category_id4, :brand4, :item_name4, :price4, :size4);
-                 INSERT INTO items(`user_id`,`post_id`,`category_id`,`brand`,`item_name`,`price`,`size`)VALUES(:user_id, :post_id, :category_id5, :brand5, :item_name5, :price5, :size5); ";
         try{
-            $sth = $this->dbh->prepare($sql);
-            $sth->bindValue(':user_id',$user_id,PDO::PARAM_INT);
-            $sth->bindValue(':post_id',$post_id,PDO::PARAM_INT);
-            $sth->bindValue(':category_id1',$category_id1,PDO::PARAM_INT);
-            $sth->bindValue(':category_id2',$category_id2,PDO::PARAM_INT);
-            $sth->bindValue(':category_id3',$category_id3,PDO::PARAM_INT);
-            $sth->bindValue(':category_id4',$category_id4,PDO::PARAM_INT);
-            $sth->bindValue(':category_id5',$category_id5,PDO::PARAM_INT);
-            $sth->bindValue(':brand1',$brand1,PDO::PARAM_STR);
-            $sth->bindValue(':brand2',$brand2,PDO::PARAM_STR);
-            $sth->bindValue(':brand3',$brand3,PDO::PARAM_STR);
-            $sth->bindValue(':brand4',$brand4,PDO::PARAM_STR);
-            $sth->bindValue(':brand5',$brand5,PDO::PARAM_STR);
-            $sth->bindValue(':item_name1',$item_name1,PDO::PARAM_STR);
-            $sth->bindValue(':item_name2',$item_name2,PDO::PARAM_STR);
-            $sth->bindValue(':item_name3',$item_name3,PDO::PARAM_STR);
-            $sth->bindValue(':item_name4',$item_name4,PDO::PARAM_STR);
-            $sth->bindValue(':item_name5',$item_name5,PDO::PARAM_STR);
-            $sth->bindValue(':price1',$price1,PDO::PARAM_STR);
-            $sth->bindValue(':price2',$price2,PDO::PARAM_STR);
-            $sth->bindValue(':price3',$price3,PDO::PARAM_STR);
-            $sth->bindValue(':price4',$price4,PDO::PARAM_STR);
-            $sth->bindValue(':price5',$price5,PDO::PARAM_STR);
-            $sth->bindValue(':size1',$size1,PDO::PARAM_STR);
-            $sth->bindValue(':size2',$size2,PDO::PARAM_STR);
-            $sth->bindValue(':size3',$size3,PDO::PARAM_STR);
-            $sth->bindValue(':size4',$size4,PDO::PARAM_STR);
-            $sth->bindValue(':size5',$size5,PDO::PARAM_STR);
-            // executeで実行
-            $result = $sth->execute();
+            foreach($items as $item){
+                if(empty($item['items_id'])){
+                    $category_id = $item['category_id'];
+                    $brand = $item['brand'];
+                    $item_name = $item['item_name'];
+                    $price = $item['price'];
+                    $size = $item['size'];
 
+                    $sql = " INSERT INTO items(`user_id`,`post_id`,`category_id`,`brand`,`item_name`,`price`,`size`)VALUES(:user_id, :post_id, :category_id, :brand, :item_name, :price, :size) ";
+                    $sth = $this->dbh->prepare($sql);
+                    $sth->bindValue(':user_id',$user_id,PDO::PARAM_INT);
+                    $sth->bindValue(':post_id',$post_id,PDO::PARAM_INT);
+                    $sth->bindValue(':category_id',$category_id,PDO::PARAM_INT);
+                    $sth->bindValue(':brand',$brand,PDO::PARAM_STR);
+                    $sth->bindValue(':item_name',$item_name,PDO::PARAM_STR);
+                    $sth->bindValue(':price',$price,PDO::PARAM_STR);
+                    $sth->bindValue(':size',$size,PDO::PARAM_STR);
+                    $result = $sth->execute();
+                }
+            }
             return $result;
         } catch (\Exception $e) {
             error_log('エラー'.$e->getMessage());
@@ -371,9 +286,19 @@ class Post extends Db {
             echo '保存できていません。';
             return $result;
         }
+
     }
 
-
+    /**
+     * 投稿の更新(タイトル、スタイルID、コーデ内容紹介、ファイル名、保存先のパス）
+     * @param int $user_id ユーザID
+     * @param string $title　タイトル
+     * @param int $style_id　スタイルID
+     * @param string $contents　コーデ内容紹介
+     * @param string $save_filename　ファイル名
+     * @param string $save_path　保存先のパス
+     * @return bool $result
+     */
     public function updatePostData(){
         $result = false;
 
@@ -421,7 +346,7 @@ class Post extends Db {
     }
 
     /**
-     * 新規投稿の保存(タイトル、スタイルID、コーデ内容紹介、ファイル名、保存先のパス）
+     * 投稿編集画面でアイテムを増やさず内容だけを変更した場合に内容を保存する処理(タイトル、スタイルID、コーデ内容紹介、ファイル名、保存先のパス）
      * @param int $user_id ユーザID
      * @param string $category_id　カテゴリー
      * @param string $brand　ブランド
@@ -430,86 +355,34 @@ class Post extends Db {
      * @param string $size　サイズ
      * @return bool $result
      */
-    public function updatePostItem() {
+    public function updatePostItem($itemData) {
         $result = false;
 
-        $itemData = $_SESSION['itemData'];
         $user_id  = $itemData['user_id'];
         $post_id  = $itemData['post_id'];
-        $items_id1 = $itemData['items_id1'];
-        $items_id2 = $itemData['items_id2'];
-        $items_id3 = $itemData['items_id3'];
-        $items_id4 = $itemData['items_id4'];
-        $items_id5 = $itemData['items_id5'];
-        $category_id1 = $itemData['category1'];
-        $category_id2 = $itemData['category2'];
-        $category_id3 = $itemData['category3'];
-        $category_id4 = $itemData['category4'];
-        $category_id5 = $itemData['category5'];
-        $brand1 = $itemData['brand1'];
-        $brand2 = $itemData['brand2'];
-        $brand3 = $itemData['brand3'];
-        $brand4 = $itemData['brand4'];
-        $brand5 = $itemData['brand5'];
-        $item_name1 = $itemData['item_name1'];
-        $item_name2 = $itemData['item_name2'];
-        $item_name3 = $itemData['item_name3'];
-        $item_name4 = $itemData['item_name4'];
-        $item_name5 = $itemData['item_name5'];
-        $price1 = $itemData['price1'];
-        $price2 = $itemData['price2'];
-        $price3 = $itemData['price3'];
-        $price4 = $itemData['price4'];
-        $price5 = $itemData['price5'];
-        $size1 = $itemData['size1'];
-        $size2 = $itemData['size2'];
-        $size3 = $itemData['size3'];
-        $size4 = $itemData['size4'];
-        $size5 = $itemData['size5'];
+        $items = $this->createItemsArray($itemData);
 
-        $sql = " UPDATE items SET user_id = :user_id, post_id = :post_id, items_id = :items_id1, category_id = :category_id1, brand = :brand1, item_name = :item_name1, price = :price1, size = :size1 WHERE post_id = :post_id AND items_id = :items_id1;
-                 UPDATE items SET user_id = :user_id, post_id = :post_id, items_id = :items_id2, category_id = :category_id2, brand = :brand2, item_name = :item_name2, price = :price2, size = :size2 WHERE post_id = :post_id AND items_id = :items_id2;
-                 UPDATE items SET user_id = :user_id, post_id = :post_id, items_id = :items_id3, category_id = :category_id3, brand = :brand3, item_name = :item_name3, price = :price3, size = :size3 WHERE post_id = :post_id AND items_id = :items_id3;
-                 UPDATE items SET user_id = :user_id, post_id = :post_id, items_id = :items_id4, category_id = :category_id4, brand = :brand4, item_name = :item_name4, price = :price4, size = :size4 WHERE post_id = :post_id AND items_id = :items_id4;
-                 UPDATE items SET user_id = :user_id, post_id = :post_id, items_id = :items_id5, category_id = :category_id5, brand = :brand5, item_name = :item_name5, price = :price5, size = :size5 WHERE post_id = :post_id AND items_id = :items_id5; ";
         try{
-            $sth = $this->dbh->prepare($sql);
-            $sth->bindValue(':user_id',$user_id,PDO::PARAM_INT);
-            $sth->bindValue(':post_id',$post_id,PDO::PARAM_INT);
-            $sth->bindValue(':items_id1',$items_id1,PDO::PARAM_INT);
-            $sth->bindValue(':items_id2',$items_id2,PDO::PARAM_INT);
-            $sth->bindValue(':items_id3',$items_id3,PDO::PARAM_INT);
-            $sth->bindValue(':items_id4',$items_id4,PDO::PARAM_INT);
-            $sth->bindValue(':items_id5',$items_id5,PDO::PARAM_INT);
-            $sth->bindValue(':category_id1',$category_id1,PDO::PARAM_INT);
-            $sth->bindValue(':category_id2',$category_id2,PDO::PARAM_INT);
-            $sth->bindValue(':category_id3',$category_id3,PDO::PARAM_INT);
-            $sth->bindValue(':category_id4',$category_id4,PDO::PARAM_INT);
-            $sth->bindValue(':category_id5',$category_id5,PDO::PARAM_INT);
-            $sth->bindValue(':brand1',$brand1,PDO::PARAM_STR);
-            $sth->bindValue(':brand2',$brand2,PDO::PARAM_STR);
-            $sth->bindValue(':brand3',$brand3,PDO::PARAM_STR);
-            $sth->bindValue(':brand4',$brand4,PDO::PARAM_STR);
-            $sth->bindValue(':brand5',$brand5,PDO::PARAM_STR);
-            $sth->bindValue(':item_name1',$item_name1,PDO::PARAM_STR);
-            $sth->bindValue(':item_name2',$item_name2,PDO::PARAM_STR);
-            $sth->bindValue(':item_name3',$item_name3,PDO::PARAM_STR);
-            $sth->bindValue(':item_name4',$item_name4,PDO::PARAM_STR);
-            $sth->bindValue(':item_name5',$item_name5,PDO::PARAM_STR);
-            $sth->bindValue(':price1',$price1,PDO::PARAM_STR);
-            $sth->bindValue(':price2',$price2,PDO::PARAM_STR);
-            $sth->bindValue(':price3',$price3,PDO::PARAM_STR);
-            $sth->bindValue(':price4',$price4,PDO::PARAM_STR);
-            $sth->bindValue(':price5',$price5,PDO::PARAM_STR);
-            $sth->bindValue(':size1',$size1,PDO::PARAM_STR);
-            $sth->bindValue(':size2',$size2,PDO::PARAM_STR);
-            $sth->bindValue(':size3',$size3,PDO::PARAM_STR);
-            $sth->bindValue(':size4',$size4,PDO::PARAM_STR);
-            $sth->bindValue(':size5',$size5,PDO::PARAM_STR);
-            // executeで実行
-            $result = $sth->execute();
-            
+            foreach($items as $item){
+                $category_id = $item['category_id'];
+                $items_id = $item['items_id'];
+                $brand = $item['brand'];
+                $item_name = $item['item_name'];
+                $price = $item['price'];
+                $size = $item['size'];
 
+                $sql = " UPDATE items SET user_id = :user_id, post_id = :post_id, items_id = :items_id, category_id = :category_id, brand = :brand, item_name = :item_name, price = :price, size = :size WHERE post_id = :post_id AND items_id = :items_id ";
+                $sth = $this->dbh->prepare($sql);
+                $sth->bindValue(':user_id',$user_id,PDO::PARAM_INT);
+                $sth->bindValue(':post_id',$post_id,PDO::PARAM_INT);
+                $sth->bindValue(':items_id',$items_id,PDO::PARAM_INT);
+                $sth->bindValue(':category_id',$category_id,PDO::PARAM_INT);
+                $sth->bindValue(':brand',$brand,PDO::PARAM_STR);
+                $sth->bindValue(':item_name',$item_name,PDO::PARAM_STR);
+                $sth->bindValue(':price',$price,PDO::PARAM_STR);
+                $sth->bindValue(':size',$size,PDO::PARAM_STR);
+                $result = $sth->execute();
+            }
             return $result;
         } catch (\Exception $e) {
             error_log('エラー'.$e->getMessage());
@@ -531,19 +404,5 @@ class Post extends Db {
         $sth->execute();
 
     }
-
-    // public function deleteItemData() {
-    //     exit;
-    //     $sql = ' UPDATE items SET del_flg = 1 ';
-    //     $sql .= ' WHERE post_id = :post_id ';
-    //     $sth = $this->dbh->prepare($sql);
-    //     $sth->bindValue(':post_id', $id, PDO::PARAM_INT);
-    //     $sth->execute();
-
-    // }
-    
-
-
-
 
 }

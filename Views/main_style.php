@@ -15,8 +15,6 @@ foreach($params['style'] as $post_id){
 
 $errors = $_SESSION;
 
-// foreach($params['style'][0] as $post_id){
-// }
 $post_id = $post_id['post_id'];
 
 

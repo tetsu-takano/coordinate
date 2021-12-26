@@ -4,7 +4,6 @@ require_once(ROOT_PATH .'Models/Users.php');
 require_once(ROOT_PATH .'Controller/UsersController.php');
 $reset = new UsersController();
 $reset->reset($_POST['id'],$_POST['password']);
-var_dump($reset);
 
 //エラーメッセージ
 $err = [];
@@ -35,15 +34,6 @@ require_once(ROOT_PATH .'Controller/UsersController.php');
 $reset = new UsersController();
 $reset->reset($_POST['id'],$_POST['password']);
 
-// // ログイン成功時の処理
-// $result = User::login($email, $password);
-// //ログイン失敗時の処理
-// if(!$result){
-//     header('Location: login.php');
-//     return;
-// }
-
-// $login_user = $_SESSION['login_user'];
 
 ?>
 

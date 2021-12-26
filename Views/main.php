@@ -10,8 +10,6 @@ if(!isset($_SESSION)) {
   session_start();
 }
 
-// $file_path = '/' . $params['posts']['file_path'];
-
 
 //ユーザーIDと投稿IDを元にいいね値の重複チェックを行う
 require_once(ROOT_PATH .'/database.php');

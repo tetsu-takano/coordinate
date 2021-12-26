@@ -12,7 +12,6 @@ class UsersController {
         $this->request['post'] = $_POST;
 
         // モデルオブジェクトの生成
-        // $this->post = new post();
         $this->Users = new Users();
         // 別モデルとの連携
         $dbh = $this->Users->get_db_handler();

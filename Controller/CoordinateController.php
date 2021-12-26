@@ -7,8 +7,7 @@ require_once(ROOT_PATH.'/Models/Like.php');
 
 class CoordinateController {
     private $request;   //リクエストパラメータ(GET,POST)
-    private $Users;      //Userモデル
-    private $Style;      //Areaモデル  
+    private $Style;      //Styleモデル  
     private $Post;      //Postモデル    
     private $Like;      //Likeモデル
     
@@ -21,13 +20,8 @@ class CoordinateController {
         //　モデルオブジェクトの生成 (Post.php)
         $this->Post = new Post();
         //　別モデルと連携（Style.php）
-        // $dbh = $this->Users->get_db_handler();
         $this->Style = new Style();
-        //　別モデルと連携（Post.php）
-        // $dbh = $this->Users->get_db_handler();
-        // $this->Post = new Post($dbh);
-        // $this->Users = new Users();
-        // $dbh = $this->Users->get_db_handler();
+        //　別モデルと連携（Like.php）
         $this->Like = new Like();
 
     }
@@ -38,18 +32,11 @@ class CoordinateController {
             $page = $this->request['get']['page'];
         }
 
-        // $style_id = 0;
-        // if(isset($this->request['get']['style_id'])) {
-        //     $style_id = $this->request['get']['style_id'];
-        // }
-
         $posts = $this->Post->findAll($page);
         $posts_count = $this->Post->countAll($page);
-        $style_posts = $this->Post->findByStyle();
         $params = [
             'posts' => $posts,
             'pages' => intdiv($posts_count,4),
-            'style_posts' => $style_posts,
         ];
         return $params;
     }
@@ -95,7 +82,7 @@ class CoordinateController {
 
     public function edit() {
         $edit = $this->Post->findById($this->request['get']['id']);
-        $edit_items = $this->Post->editItems($this->request['get']['id']);
+        $edit_items = $this->Post->findItems($this->request['get']['id']);
         $params = [
             'edit' => $edit,
             'edit_items' => $edit_items
@@ -105,7 +92,7 @@ class CoordinateController {
 
     public function update($itemData) {
         $updatePost = $this->Post->updatePostData();
-        $updateItem = $this->Post->updatePostItem();
+        $updateItem = $this->Post->updatePostItem($itemData);
         $this->Post->editSaveItemData($itemData);
         $params = [
             'update' => $updatePost,
@@ -117,10 +104,8 @@ class CoordinateController {
 
     public function delete() {
         $deletePost = $this->Post->deletePostData($this->request['get']['id']);
-        // $deleteItem = $this->Post->deleteItemData($this->request['get']['id']);
         $params = [
             'deletePost' => $deletePost,
-            // 'deleteItem' => $deleteItem,
         ];
 
         return $params;
